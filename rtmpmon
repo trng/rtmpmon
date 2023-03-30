@@ -1,9 +1,11 @@
 #!/bin/bash
+self_if='eth0'
 self_ip='192.168.88.23'
 self_port='1935'
-kbits_max=7000
+kbits_max=8000
 tmpfile="/tmp/rtmpmontcpdumpfilter.tmp"
 YEL='\033[1;33m' # Yellow
+CYA='\033[1;40m' # Cyan
 NC='\033[0m' # No Color
 
 echo -e "***\n***${YEL}  RTMP live stream monitor v.1.0${NC}\n***"
@@ -13,46 +15,60 @@ if [[ $# -gt 0  ]]; then
   [[ -z ${strtest} ]] && kbits_max=$1
 else
   echo -e "***  Usage:"
-  echo -e "***    rtmpmon bandwidth(kbits)"
+  echo -e "***"
+  echo -e "***    rtmpmon [bandwidth(kbits)]"
+  echo -e "***"
   echo -e "***    Bandwidth used for scaling graphics only."
   echo -e "***    Values exceeded bandwidth will be graphically trucuated and marked with '+++'"
-  echo -e "***    Default bandwidth ${kbits_max}"
+  echo -e "***    Default bandwidth, interface/ip/port to monitor - configurable via config file."
   echo -e "***  \n***  Example:"
   echo -e "***    rtmpmon"
   echo -e "***    rtmpmon 10000"
 fi
 
 if [ ! -f "$(realpath $0).conf" ]; then
-  echo -e "\n\n\nFirst run!!!\n\n\n"
+  # No config file
+  echo -e "\n\n\n${YEL}First run!!!${NC}\n"
   symlinkdir="/usr/local/bin/"
   if [[ ! -h "${symlinkdir}/$(basename $0)" ]]; then
-    printf "Create symlink in ${symlinkdir}? (Y/N) "
+    printf "    ${CYA}Create symlink in ${symlinkdir}? (Y/N)${NC} "
     while read -N 1 -n 1 -s userchoice ; do
       if [[ 'YyNn' == *"$userchoice"* ]]; then
         [[ 'Yy' == *"$userchoice"* ]] && ln -s $(realpath $0) ${symlinkdir}/$(basename $0)
         break
       fi
     done
+    echo -e "\n"
   fi
 
   # get ip address on interface with default gateway
-  tmp_ip=`ip -4 route show default | awk '{ print $9 }'`
-  echo -e "self_ip=${tmp_ip}\nself_port=1935" > $(realpath $0).conf
-  echo -e "Default configuration saved.\nYou can change these settings in '$(realpath $0).conf'"
-  cat $(realpath $0).conf
+  self_if=`ip -4 route show default | awk '{ print $5 }'`
+  self_ip=`ip -4 route show default | awk '{ print $9 }'`
+  echo -e "self_if=${self_if}\nself_ip=${self_ip}\nself_port=1935\nkbits_max=${kbits_max}" > $(realpath $0).conf
+  echo -e "    ${YEL}Default configuration saved.\n    You can change these settings in '$(realpath $0).conf'${NC}"
+  sed -e 's/^/        /' $(realpath $0).conf
+  printf "\n\n    ${CYA}Start monitor right now? (Y/N)${NC} "
+  while read -N 1 -n 1 -s userchoice ; do
+      if [[ 'YyNn' == *"$userchoice"* ]]; then
+        [[ 'Nn' == *"$userchoice"* ]] && exit
+        break
+      fi
+  done
 else
   # Config file exsit. Reading
   . $(realpath $0).conf
-  echo -e "\n\nTrying to find streams using these settings:"
-  echo -e "    self_ip   : ${self_ip}\n    self_port : ${self_port}"
+  echo -e "\n\n${YEL}Trying to find streams using these settings:${NC}"
+  echo -e "    self_if   : ${self_if}\n    self_ip   : ${self_ip}\n    self_port : ${self_port}"
 fi
 
 
+# if arg supplied assign it to kbits_max
+[[ $# -gt 0  ]] && kbits_max=$1
 
 
 printf "\n\n${YEL}Looking for rtmp streams. Please wait...${NC}\r"
 printf  "dst host ${self_ip} and dst port ${self_port} " > ${tmpfile}
-rtmp_avail=`timeout 3 tcpdump -nnn -c 1 -i eth0 -F ${tmpfile} 2>/dev/null | awk {'print $3'}`
+rtmp_avail=`timeout 3 tcpdump -nnn -c 1 -i ${self_if} -F ${tmpfile} 2>/dev/null | awk {'print $3'}`
 
 if [ -z "${rtmp_avail}" ]; then
   echo "There are no active incoming rtmp streams. Nothing to monitor"
@@ -60,22 +76,22 @@ if [ -z "${rtmp_avail}" ]; then
 fi
 
 idx=1
-echo -e "Active incoming rtmp streams (source ip/source port):"
+echo -e "${YEL}Active incoming rtmp streams (source ip : source port):${NC}"
 while [ -n "${rtmp_avail}" ]
 do
   founded_ip=${rtmp_avail%.*}
   founded_port=${rtmp_avail##*.}
-  printf "$idx. %16s       %8d                     \n" ${founded_ip} ${founded_port}
+  printf "    $idx. %16s  :  %d                       \n" ${founded_ip} ${founded_port}
   ipaddr[$idx]=${founded_ip}
   tcpport[$idx]=${founded_port}
   idx=$((idx+1))
   printf " and not (src port ${founded_port} and src host ${founded_ip})" >> ${tmpfile}
-  printf "${YEL}Lookin for next stream. Please wait...${NC}\r"
-  rtmp_avail=`timeout 2 tcpdump -nnn -c 1 -i eth0 -F ${tmpfile} 2>/dev/null | awk '{print $3}'`
+  printf "    ${YEL}Lookin for next stream. Please wait...${NC}\r"
+  rtmp_avail=`timeout 2 tcpdump -nnn -c 1 -i ${self_if} -F ${tmpfile} 2>/dev/null | awk '{print $3}'`
 done
 
 echo "                                                          "
-printf "Please select stream to monitor: "
+printf "    ${CYA}Please select stream to monitor:${NC} "
 userchoice=0
 while read -N 1 -n 1 -s userchoice ; do
   #if [[ ${userchoice} -gt 0 && ${userchoice} -lt ${idx} ]] ; then
@@ -85,11 +101,11 @@ while read -N 1 -n 1 -s userchoice ; do
 done
 
 echo "$userchoice"
-echo -e "\n\n${YEL}Start to monitor source    ${ipaddr[$userchoice]}:${tcpport[$userchoice]}${NC}"
+echo -e "\n\n${YEL}Start to monitor source:${NC}\n    ${ipaddr[$userchoice]}:${tcpport[$userchoice]}"
 echo "dst host ${self_ip} and dst port ${self_port} and src port ${tcpport[$userchoice]} and src host ${ipaddr[$userchoice]}" > ${tmpfile}
 
-log_file=`echo ~`
+log_file=`printf ~`
 ddd=` date +"%y-%m-%d_%H:%M:%S"`
 log_file="${log_file}/rtmpmon_${ddd}_${ipaddr[$userchoice]}_${tcpport[$userchoice]}.log"
-echo -e "${YEL}Log will be saved to       ${log_file}${NC}"
+echo -e "\n${YEL}Log will be saved to:${NC}\n    ${log_file}\n"
 tcpdump -nnn -i eth0 -F ${tmpfile} -w - | pv -fbn 2>&1>/dev/null | $(dirname $(realpath $0))/rtmpmon-pipemodule.sh $kbits_max $log_file
