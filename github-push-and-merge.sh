@@ -36,8 +36,14 @@ fi
 
 git switch -C ${tempbranchname} origin/main
 git add -A
+git diff --cached --exit-code > /dev/null
+if [[ $? -eq 0 ]] ; then
+  echo -e "\nNothing to commit. Exiting...\n"
+  git branch --delete ${tempbranchname}
+  exit 1
+fi
+
 git commit
 gh pr create -f
 gh pr merge
-
 
