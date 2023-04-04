@@ -21,13 +21,16 @@ done
 gh auth status
 if [ $? -ne 0 ]; then
   echo "Opening a token file..."
-  export GH_TOKEN=`ccdecrypt -c ${tokenfile}`
+  GH_TOKEN=`ccdecrypt -c ${tokenfile}`
   if [[ $? -ne 0 ]] ; then
     echo "GitHub token is not decrypted. Aborting..."
     exit 1
   fi
   echo $GH_TOKEN | gh auth login --with-token
   gh auth status
+  echo -e "${YEL}\n\n\nGitHub authentication is not preserved between script runs."
+  echo -e "If you need multiple pull requests/merges - login from bash with this command:\n"
+  echo -e "${CYA}echo ${GH_TOKEN} | gh auth login --with-token${NC}\n"
 fi
 
 
@@ -38,6 +41,3 @@ gh pr create -f
 gh pr merge
 
 
-echo -e "${YEL}\n\n\nGitHub authentication is not preserved between script runs."
-echo -e "If you need multiple pull requests/merges - login from bash with this command:\n"
-echo -e "${CYA}echo ${GH_TOKEN} | gh auth login --with-token${NC}\n"
