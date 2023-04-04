@@ -21,7 +21,7 @@ done
 gh auth status
 if [ $? -ne 0 ]; then
   echo "Opening a token file..."
-  GH_TOKEN=`ccdecrypt -c ${tokenfile}`
+  export GH_TOKEN=`ccdecrypt -c ${tokenfile}`
   if [[ $? -ne 0 ]] ; then
     echo "GitHub token is not decrypted. Aborting..."
     exit 1
