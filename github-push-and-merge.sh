@@ -39,6 +39,7 @@ git add -A
 git diff --cached --exit-code > /dev/null
 if [[ $? -eq 0 ]] ; then
   echo -e "\nNothing to commit. Exiting...\n"
+  git switch main
   git branch --delete ${tempbranchname}
   exit 1
 fi
