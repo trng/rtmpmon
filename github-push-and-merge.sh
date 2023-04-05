@@ -18,8 +18,18 @@ for cmdneeded in ccdecrypt gh git ; do
 done
 
 
+# check before run git
+# git config --global user.email "serhy@ukr.net"
+# git config --global user.name "trng"
+
+
+
 gh auth status
 if [ $? -ne 0 ]; then
+  if [[ ! -f $tokenfile ]] ; then
+    echo -e "GitHub token not found in file ${CYA}$tokenfile${NC}"
+    exit
+  fi
   echo "Opening a token file..."
   GH_TOKEN=`ccdecrypt -c ${tokenfile}`
   if [[ $? -ne 0 ]] ; then

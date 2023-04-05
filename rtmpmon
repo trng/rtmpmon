@@ -29,7 +29,7 @@ fi
 
 if [ ! -f "$(realpath $0).conf" ]; then
   # No config file
-  echo -e "\n\n\n${YEL}First run!!!${NC}\n"
+  echo -e "\n\n\n${YEL}FIRST RUN!!!${NC}\n"
   symlinkdir="/usr/local/bin/"
   if [[ ! -h "${symlinkdir}/$(basename $0)" ]]; then
     printf "    ${CYA}Create symlink in ${symlinkdir}? (Y/N)${NC} "
@@ -43,15 +43,17 @@ if [ ! -f "$(realpath $0).conf" ]; then
   fi
 
   # get ip address on interface with default gateway
-  self_if=`ip -4 route show default | awk '{ print $5 }'`
-  self_ip=`ip -4 route show default | awk '{ print $9 }'`
+  #    ip route get 1.1.1.1
+  #    1.1.1.1 via 95.67.110.161 dev eno2 src 95.67.110.165 uid 0
+  self_if=`ip route get 1.1.1.1 | awk 'NR==1{ print $5 }'`
+  self_ip=`ip route get 1.1.1.1 | awk 'NR==1{ print $7 }'`
   echo -e "self_if=${self_if}\nself_ip=${self_ip}\nself_port=1935\nkbits_max=${kbits_max}" > $(realpath $0).conf
   echo -e "    ${YEL}Default configuration saved.\n    You can change these settings in '$(realpath $0).conf'${NC}"
   sed -e 's/^/        /' $(realpath $0).conf
   printf "\n\n    ${CYA}Start monitor right now? (Y/N)${NC} "
   while read -N 1 -n 1 -s userchoice ; do
       if [[ 'YyNn' == *"$userchoice"* ]]; then
-        [[ 'Nn' == *"$userchoice"* ]] && exit
+        [[ 'Nn' == *"$userchoice"* ]] && { echo ""; exit; }
         break
       fi
   done
