@@ -30,7 +30,7 @@ update_size(){
   cols=$(tput cols)  # get actual columns of term
   onepage=$rows
   calc_foobar $kbits_max
-  printf "\n${YEL}--TIME--   --BANDWIDTH--   %s %d kbps${NC}\n" ${foobar} $kbits_max
+  printf "${YEL}--TIME--   --BANDWIDTH--   %s %d kbps${NC}\n" ${foobar} $kbits_max
 }
 
 trap update_size WINCH

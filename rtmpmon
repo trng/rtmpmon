@@ -79,7 +79,7 @@ if [ -z "${rtmp_avail}" ]; then
 fi
 
 idx=1
-echo -e "${YEL}Active incoming rtmp streams (source ip : source port):${NC}"
+echo -e "${YEL}Active incoming rtmp streams (source-ip : source-port):${NC}"
 while [ -n "${rtmp_avail}" ]
 do
   founded_ip=${rtmp_avail%.*}
@@ -111,4 +111,4 @@ log_file=`printf ~`
 ddd=`date +"%Y-%m-%d_%H:%M:%S"`
 log_file="${log_file}/rtmpmon_${ddd}_${ipaddr[$userchoice]}_${tcpport[$userchoice]}.log"
 echo -e "\n${YEL}Log will be saved to:${NC}\n    ${log_file}\n"
-tcpdump -nnn -i eth0 -F ${tmpfile} -w - | pv -fbn 2>&1>/dev/null | $(dirname $(realpath $0))/rtmpmon-pipemodule.sh $kbits_max $log_file
+tcpdump -nnn -i ${self_if} -F ${tmpfile} -w - | pv -fbn 2>&1>/dev/null | $(dirname $(realpath $0))/rtmpmon-pipemodule.sh $kbits_max $log_file
