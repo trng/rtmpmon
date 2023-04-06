@@ -19,8 +19,8 @@ done
 
 
 # check before run git
-# git config --global user.email "serhy@ukr.net"
-# git config --global user.name "trng"
+# git config --global user.email "username@mail.server"
+# git config --global user.name "username"
 
 
 

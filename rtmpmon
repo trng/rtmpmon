@@ -74,7 +74,7 @@ printf  "dst host ${self_ip} and dst port ${self_port} " > ${tmpfile}
 rtmp_avail=`timeout 3 tcpdump -nnn -c 1 -i ${self_if} -F ${tmpfile} 2>/dev/null | awk {'print $3'}`
 
 if [ -z "${rtmp_avail}" ]; then
-  echo -e "${CYA}There are no active incoming rtmp streams. Nothing to monitor. Exiting...${NC}"
+  echo -e "${CYA}There are no active incoming rtmp streams. Nothing to monitor. Exiting...${NC}\n"
   exit
 fi
 
