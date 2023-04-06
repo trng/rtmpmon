@@ -18,11 +18,6 @@ for cmdneeded in ccdecrypt gh git ; do
 done
 
 
-# check before run git
-# git config --global user.email "username@mail.server"
-# git config --global user.name "username"
-
-
 
 gh auth status
 if [ $? -ne 0 ]; then
@@ -42,6 +37,17 @@ if [ $? -ne 0 ]; then
   echo -e "If you need multiple pull requests/merges - login from bash with this command:\n"
   echo -e "${CYA}echo ${GH_TOKEN} | gh auth login --with-token${NC}\n"
 fi
+
+
+
+
+# check before run git
+# git config --global user.email "username@mail.server"
+# git config --global user.name "username"
+# git pull (userchoice???)
+
+
+
 
 
 git switch -C ${tempbranchname} origin/main
