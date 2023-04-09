@@ -50,6 +50,15 @@ fi
 
 
 
+#git fetch
+# git rev-list HEAD...origin/main --count
+#if ! git diff --quiet remotes/origin/HEAD  ; then
+#  echo -e "\n${CYA}There are newer files in the remote repo.\nPlease do a ${YEL}git pull${CYA} before commiting.${NC}\n"
+#fi
+
+
+
+
 
 
 git switch -C ${tempbranchname} origin/main
