@@ -1,6 +1,6 @@
 # rtmpmon
 
-RTMP live stream monitor and logger (bash, no other languages used).
+RTMP live stream monitor and logger (*bash, no other languages used*).
 
 ### Required external programs
 * tcpdump
