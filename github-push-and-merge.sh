@@ -7,6 +7,8 @@ tokenfile=~/gh.secret.cpt
 tempbranchname=rptemp${RANDOM}
 
 #ddd=` date +"%y%m%d%H%M%S"`
+
+# escape ansi sequences for coloring
 YEL='\033[1;33m' # Yellow
 CYA='\033[1;36m' # Cyan
 NC='\033[0m'     # No Color
