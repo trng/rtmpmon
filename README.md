@@ -9,4 +9,4 @@ RTMP live stream monitor and logger (*bash, no other languages used*).
 * sed
 
 ## TODO
-Add monitoring for streams pulled from remote servers.
++ Add monitoring for streams pulled from remote servers.
