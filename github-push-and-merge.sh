@@ -37,7 +37,7 @@ if [ $? -ne 0 ]; then
   gh auth status
   echo -e "${YEL}\n\n\nGitHub authentication is not preserved between script runs."
   echo -e "If you need multiple pull requests/merges - login from bash with this command:\n"
-  echo -e "${CYA}echo ${GH_TOKEN} | gh auth login --with-token${NC}\n"
+  echo -e "${CYA}echo ${GH_TOKEN} | gh auth login --with-token ; history -d -1 ${NC}\n"
 fi
 
 
